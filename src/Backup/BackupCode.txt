@@ -1,0 +1,53 @@
+
+    For Menu Array - 
+    -------------------
+
+    const menuConfig = [
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    icon: "bi-house-door",
+    component: <Dashboard />,
+  },
+  {
+    id: "reports",
+    title: "Reports",
+    icon: "bi-bar-chart",
+    submenu: [
+      {
+        id: "sales",
+        title: "Sales Report",
+        icon: "bi-cash",
+        component: <SalesReport />,
+      },
+      {
+        id: "analytics",
+        title: "Analytics",
+        icon: "bi-graph-up",
+        subChild: [
+          {
+            id: "yearly",
+            title: "Yearly Stats",
+            icon: "bi-dot",
+            component: <YearlyStats />,
+          },
+          {
+            id: "monthly",
+            title: "Monthly Stats",
+            icon: "bi-dot",
+            component: <MonthlyStats />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "settings",
+    title: "Settings",
+    icon: "bi-gear",
+    component: <Settings />,
+  },
+];
+
+============================================================================
+
