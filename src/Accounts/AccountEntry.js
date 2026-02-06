@@ -195,6 +195,7 @@ function AccountEntry() {
   };
 
   const handleDatainGrid = (mode, GridSearchCode) => {
+    debugger;
     const SNo = mode === "add" ? sno : GridSearchCode;
     const obj = {
       SNo,
@@ -240,13 +241,46 @@ function AccountEntry() {
     }
   };
 
+  const AddDatainGrid = () => {
+    const obj = {
+      SNo: sno,
+      debit,
+      credit,
+      reasonCode: reason.Code,
+      reasonName: reason.Name,
+      comment,
+      categoryCode: category.Code,
+      categoryName: category.Name,
+      paytypeCode: paytype.Code,
+      paytypeName: paytype.Name,
+    };
+    setGridData((prev) => [...prev, obj]);
+    setSno((prev) => prev + 1);
+    ClearValues();
+    debitRef.current?.focus();
+  };
+
+  const DeleteDatainGrid = (GridSno) => {
+    setGridData((prev) => prev.filter((item) => item.SNo !== GridSno));
+  };
+
+  const FillDataFromGrid = (GridSno) => {
+    const data = gridData.find((x) => x.SNo === GridSno);
+    setDebit(data.debit);
+    setCredit(data.credit);
+    setReason({ Code: data.reasonCode, Name: data.reasonName });
+    setComment(data.comment);
+    setCategory({ Code: data.categoryCode, Name: data.categoryName });
+    setPayType({ Code: data.paytypeCode, Name: data.paytypeName });
+  };
+
   useEffect(() => {
     console.log(gridData);
   }, [gridData]);
 
   useEffect(() => {
     if (paytype) {
-      handleDatainGrid("add", 0);
+      AddDatainGrid();
     }
   }, [paytype]);
 
@@ -428,7 +462,7 @@ function AccountEntry() {
                           <td>
                             <button
                               type="button"
-                              onClick={() => handleDatainGrid("edit", row.SNo)}
+                              onClick={() => FillDataFromGrid(row.SNo)}
                               className="btn btn-success"
                             >
                               Edit
@@ -437,9 +471,7 @@ function AccountEntry() {
                           <td>
                             <button
                               type="button"
-                              onClick={() =>
-                                handleDatainGrid("delete", row.SNo)
-                              }
+                              onClick={() => DeleteDatainGrid(row.SNo)}
                               className="btn btn-danger"
                             >
                               Delete
