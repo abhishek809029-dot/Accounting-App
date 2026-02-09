@@ -29,6 +29,7 @@ function AccountEntry() {
   const categoryRef = useRef(null);
   const [paytype, setPayType] = useState(null);
   const paytypeRef = useRef(null);
+    const [addGridYN, setGridYN] = useState(false);
   const [sno, setSno] = useState(1);
   const [searchCode, setSearchCode] = useState("");
   const [reasonArray, setReasonArray] = useState([]);
@@ -279,7 +280,7 @@ function AccountEntry() {
   }, [gridData]);
 
   useEffect(() => {
-    if (paytype) {
+    if (paytype && addGridYN) {
       AddDatainGrid();
     }
   }, [paytype]);
@@ -422,6 +423,7 @@ function AccountEntry() {
                     option.Code === value.Code
                   }
                   onChange={(event, newValue) => {
+                    setGridYN(true);
                     setPayType(newValue);
                   }}
                   renderInput={(params) => (
