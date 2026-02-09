@@ -29,7 +29,7 @@ function AccountEntry() {
   const categoryRef = useRef(null);
   const [paytype, setPayType] = useState(null);
   const paytypeRef = useRef(null);
-    const [addGridYN, setGridYN] = useState(false);
+  const [editSearchCode, setEditSearchCode] = useState(null);
   const [sno, setSno] = useState(1);
   const [searchCode, setSearchCode] = useState("");
   const [reasonArray, setReasonArray] = useState([]);
@@ -174,7 +174,6 @@ function AccountEntry() {
         UserName: "ABHISHEK",
       };
       const response = await axios.post(FetchDataUrl, obj);
-      console.log(response.data);
       setReasonArray(response.data.Reason || []);
       setCategoryArray(response.data.Category || []);
       setPayTypeArray(response.data.PaymentType || []);
@@ -266,6 +265,7 @@ function AccountEntry() {
   };
 
   const FillDataFromGrid = (GridSno) => {
+    setEditSearchCode(GridSno);
     const data = gridData.find((x) => x.SNo === GridSno);
     setDebit(data.debit);
     setCredit(data.credit);
@@ -275,13 +275,38 @@ function AccountEntry() {
     setPayType({ Code: data.paytypeCode, Name: data.paytypeName });
   };
 
-  useEffect(() => {
-    console.log(gridData);
-  }, [gridData]);
+  const AddEditDatainGrid = () => {
+    setGridData((prev) => {
+      //const index = prev.findIndex((item) => item.SNo === sno);
+
+      const updatedObj = {
+        SNo: editSearchCode,
+        debit,
+        credit,
+        reasonCode: reason.Code,
+        reasonName: reason.Name,
+        comment,
+        categoryCode: category.Code,
+        categoryName: category.Name,
+        paytypeCode: paytype.Code,
+        paytypeName: paytype.Name,
+      };
+
+      setEditSearchCode(null);
+
+      // if (index !== -1) {
+      //   return prev.map(item =>
+      //     item.SNo === sno ? updatedObj : item
+      //   );
+      // }
+
+      return [...prev, updatedObj];
+    });
+  };
 
   useEffect(() => {
-    if (paytype && addGridYN) {
-      AddDatainGrid();
+    if (paytype) {
+      editSearchCode == null ? AddDatainGrid() : AddEditDatainGrid();
     }
   }, [paytype]);
 
@@ -423,7 +448,6 @@ function AccountEntry() {
                     option.Code === value.Code
                   }
                   onChange={(event, newValue) => {
-                    setGridYN(true);
                     setPayType(newValue);
                   }}
                   renderInput={(params) => (
