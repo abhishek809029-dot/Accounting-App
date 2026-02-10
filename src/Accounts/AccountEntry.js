@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import TopControl from "../GlobalJS/TopControl";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import Find from "../GlobalJS/Find";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -29,6 +30,7 @@ function AccountEntry() {
   const categoryRef = useRef(null);
   const [paytype, setPayType] = useState(null);
   const paytypeRef = useRef(null);
+  const addRef = useRef(null);
   const [editSearchCode, setEditSearchCode] = useState(null);
   const [sno, setSno] = useState(1);
   const [searchCode, setSearchCode] = useState("");
@@ -277,8 +279,6 @@ function AccountEntry() {
 
   const AddEditDatainGrid = () => {
     setGridData((prev) => {
-      //const index = prev.findIndex((item) => item.SNo === sno);
-
       const updatedObj = {
         SNo: editSearchCode,
         debit,
@@ -292,23 +292,17 @@ function AccountEntry() {
         paytypeName: paytype.Name,
       };
 
-      setEditSearchCode(null);
+      //setEditSearchCode(null);
 
       // if (index !== -1) {
-      //   return prev.map(item =>
-      //     item.SNo === sno ? updatedObj : item
-      //   );
-      // }
+      return prev.map((item) =>
+        item.SNo === editSearchCode ? updatedObj : item,
+      );
+      //}
 
-      return [...prev, updatedObj];
+      //return [...prev, updatedObj];
     });
   };
-
-  useEffect(() => {
-    if (paytype) {
-      editSearchCode == null ? AddDatainGrid() : AddEditDatainGrid();
-    }
-  }, [paytype]);
 
   return (
     <div className="container-fluid mt-3">
@@ -341,123 +335,150 @@ function AccountEntry() {
           </div>
 
           <div className="row mb-3">
-            <div className="col-md-2">
-              <div className="form-group">
-                <TextField
-                  label="Debit"
-                  value={debit || ""}
-                  onChange={(e) => setDebit(e.target.value)}
-                  inputRef={debitRef}
-                  onKeyDown={(e) => handleNextFocus(e, creditRef)}
-                  disabled={disabled}
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                />
-              </div>
-            </div>
-            <div className="col-md-2">
-              <div className="form-group">
-                <TextField
-                  label="Credit"
-                  value={credit || ""}
-                  onChange={(e) => setCredit(e.target.value)}
-                  inputRef={creditRef}
-                  onKeyDown={(e) => handleNextFocus(e, reasonRef)}
-                  disabled={disabled}
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                />
-              </div>
-            </div>
-            <div className="col-md-2">
-              <div className="form-group">
-                <Autocomplete
-                  options={reasonArray}
-                  value={reason}
-                  disabled={disabled}
-                  size="small"
-                  getOptionLabel={(option) => option.Name}
-                  isOptionEqualToValue={(option, value) =>
-                    option.Code === value.Code
-                  }
-                  onChange={(event, newValue) => {
-                    setReason(newValue);
-                  }}
-                  renderInput={(params) => (
+            <div className="col-md-6">
+              <div className="row mb-3">
+                <div className="col-md-3">
+                  <div className="form-group">
                     <TextField
-                      {...params}
-                      label="Reason"
-                      inputRef={reasonRef}
-                      onKeyDown={(e) => handleNextFocus(e, commentRef)}
+                      label="Debit"
+                      value={debit || ""}
+                      onChange={(e) => setDebit(e.target.value)}
+                      inputRef={debitRef}
+                      onKeyDown={(e) => handleNextFocus(e, creditRef)}
+                      disabled={disabled}
+                      size="small"
+                      variant="outlined"
+                      fullWidth
                     />
-                  )}
-                />
-              </div>
-            </div>
-            <div className="col-md-2">
-              <div className="form-group">
-                <TextField
-                  label="Comment"
-                  value={comment || ""}
-                  onChange={(e) => setComment(e.target.value)}
-                  inputRef={commentRef}
-                  onKeyDown={(e) => handleNextFocus(e, categoryRef)}
-                  disabled={disabled}
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                />
-              </div>
-            </div>
-            <div className="col-md-2">
-              <div className="form-group">
-                <Autocomplete
-                  options={categoryArray}
-                  value={category}
-                  disabled={disabled}
-                  size="small"
-                  getOptionLabel={(option) => option.Name}
-                  isOptionEqualToValue={(option, value) =>
-                    option.Code === value.Code
-                  }
-                  onChange={(event, newValue) => {
-                    setCategory(newValue);
-                  }}
-                  renderInput={(params) => (
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="form-group">
                     <TextField
-                      {...params}
-                      label="Category"
-                      inputRef={categoryRef}
-                      onKeyDown={(e) => handleNextFocus(e, paytypeRef)}
+                      label="Credit"
+                      value={credit || ""}
+                      onChange={(e) => setCredit(e.target.value)}
+                      inputRef={creditRef}
+                      onKeyDown={(e) => handleNextFocus(e, reasonRef)}
+                      disabled={disabled}
+                      size="small"
+                      variant="outlined"
+                      fullWidth
                     />
-                  )}
-                />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <Autocomplete
+                      options={reasonArray}
+                      value={reason}
+                      disabled={disabled}
+                      size="small"
+                      getOptionLabel={(option) => option.Name}
+                      isOptionEqualToValue={(option, value) =>
+                        option.Code === value.Code
+                      }
+                      onChange={(event, newValue) => {
+                        setReason(newValue);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Reason"
+                          inputRef={reasonRef}
+                          onKeyDown={(e) => handleNextFocus(e, categoryRef)}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="col-md-2">
-              <div className="form-group">
-                <Autocomplete
-                  options={payTypeArray}
-                  value={paytype}
-                  disabled={disabled}
-                  size="small"
-                  getOptionLabel={(option) => option.Name}
-                  isOptionEqualToValue={(option, value) =>
-                    option.Code === value.Code
-                  }
-                  onChange={(event, newValue) => {
-                    setPayType(newValue);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Payment Type"
-                      inputRef={paytypeRef}
+
+              <div className="row mb-3">
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <Autocomplete
+                      options={categoryArray}
+                      value={category}
+                      disabled={disabled}
+                      size="small"
+                      getOptionLabel={(option) => option.Name}
+                      isOptionEqualToValue={(option, value) =>
+                        option.Code === value.Code
+                      }
+                      onChange={(event, newValue) => {
+                        setCategory(newValue);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Category"
+                          inputRef={categoryRef}
+                          onKeyDown={(e) => handleNextFocus(e, paytypeRef)}
+                        />
+                      )}
                     />
-                  )}
-                />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <Autocomplete
+                      options={payTypeArray}
+                      value={paytype}
+                      disabled={disabled}
+                      size="small"
+                      getOptionLabel={(option) => option.Name}
+                      isOptionEqualToValue={(option, value) =>
+                        option.Code === value.Code
+                      }
+                      onChange={(event, newValue) => {
+                        setPayType(newValue);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Payment Type"
+                          inputRef={paytypeRef}
+                          onKeyDown={(e) => handleNextFocus(e, commentRef)}
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="row mb-3">
+                <div className="col-md-12">
+                  <div className="form-group">
+                    <TextField
+                      label="Comment"
+                      value={comment || ""}
+                      onChange={(e) => setComment(e.target.value)}
+                      inputRef={commentRef}
+                      onKeyDown={(e) => handleNextFocus(e, addRef)}
+                      disabled={disabled}
+                      size="small"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="row justify-content-center">
+                <div className="col-md-3">
+                  <Button
+                    variant="outlined"
+                    ref={addRef}
+                    onKeyDown={(e) =>
+                      editSearchCode == null
+                        ? handleNextFocus(e, debitRef, AddDatainGrid)
+                        : handleNextFocus(e, debitRef, AddEditDatainGrid)
+                    }
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
