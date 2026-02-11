@@ -11,6 +11,8 @@ import {
   handleNextFocus,
   formattedDate,
 } from "../GlobalJS/GlobalFunctions";
+const url = "/AccountsAPI/Accounts/CategoryMaster";
+const FetchDataUrl = "/AccountsAPI/Accounts/FetchAccountEntryData";
 
 function AccountEntry() {
   const [activeButtons, setActiveButtons] = useState(["add", "find"]);
@@ -44,8 +46,6 @@ function AccountEntry() {
   const [gridData, setGridData] = useState([]);
   const [disabled, setDisabled] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const url = "/AccountsAPI/Accounts/CategoryMaster";
-  const FetchDataUrl = "/AccountsAPI/Accounts/FetchAccountEntryData";
 
   useEffect(() => {
     LoadData();
@@ -199,50 +199,51 @@ function AccountEntry() {
     setPayType(null);
   };
 
-const AddDatainGrid = () => {
-  if (!debit && !credit) {
-    Swal.fire({
-      icon: "warning",
-      text: "Please enter either Debit or Credit amount.",
-    });
+  const AddDatainGrid = () => {
+    if (!debit && !credit) {
+      Swal.fire({
+        icon: "warning",
+        text: "Please enter either Debit or Credit amount.",
+      });
+      debitRef.current?.focus();
+      return;
+    }
+    if (!reason) {
+      setReasonError(true);
+      reasonRef.current?.focus();
+      return;
+    }
+    if (!category) {
+      setCategoryError(true);
+      categoryRef.current?.focus();
+      return;
+    }
+    if (!paytype) {
+      setPayTypeError(true);
+      paytypeRef.current?.focus();
+      return;
+    }
+    const obj = {
+      SNo: sno,
+      debit,
+      credit,
+      reasonCode: reason?.Code,
+      reasonName: reason?.Name,
+      comment,
+      categoryCode: category?.Code,
+      categoryName: category?.Name,
+      paytypeCode: paytype?.Code,
+      paytypeName: paytype?.Name,
+    };
+    setGridData((prev) => [...prev, obj]);
+    setSno((prev) => prev + 1);
+    ClearValues();
     debitRef.current?.focus();
-    return;
-  }
-  if (!reason) {
-    setReasonError(true);
-    reasonRef.current?.focus();
-    return;
-  }
-  if (!category) {
-    setCategoryError(true);
-    categoryRef.current?.focus();
-    return;
-  }
-  if (!paytype) {
-    setPayTypeError(true);
-    paytypeRef.current?.focus();
-    return;
-  }
-  const obj = {
-    SNo: sno,
-    debit,
-    credit,
-    reasonCode: reason?.Code,
-    reasonName: reason?.Name,
-    comment,
-    categoryCode: category?.Code,
-    categoryName: category?.Name,
-    paytypeCode: paytype?.Code,
-    paytypeName: paytype?.Name,
   };
-  setGridData(prev => [...prev, obj]);
-  setSno(prev => prev + 1);
-  ClearValues();
-  debitRef.current?.focus();
-};
 
   const DeleteDatainGrid = (GridSno) => {
     setGridData((prev) => prev.filter((item) => item.SNo !== GridSno));
+    debitRef.current.focus();
   };
 
   const FillDataFromGrid = (GridSno) => {
@@ -259,20 +260,20 @@ const AddDatainGrid = () => {
 
   const AddEditDatainGrid = () => {
     const updatedObj = {
-        SNo: editSearchCode,
-        debit,
-        credit,
-        reasonCode: reason.Code,
-        reasonName: reason.Name,
-        comment,
-        categoryCode: category.Code,
-        categoryName: category.Name,
-        paytypeCode: paytype.Code,
-        paytypeName: paytype.Name,
-      };
+      SNo: editSearchCode,
+      debit,
+      credit,
+      reasonCode: reason.Code,
+      reasonName: reason.Name,
+      comment,
+      categoryCode: category.Code,
+      categoryName: category.Name,
+      paytypeCode: paytype.Code,
+      paytypeName: paytype.Name,
+    };
     const UpdatedData = gridData.map((item) =>
-        item.SNo === editSearchCode ? updatedObj : item,
-      );
+      item.SNo === editSearchCode ? updatedObj : item,
+    );
     setGridData(UpdatedData);
     setEditSearchCode(null);
     ClearValues();
@@ -319,7 +320,7 @@ const AddDatainGrid = () => {
                       value={debit || ""}
                       onChange={(e) => {
                         const value = e.target.value;
-                         if (/^\d*\.?\d{0,2}$/.test(value)) {
+                        if (/^\d*\.?\d{0,2}$/.test(value)) {
                           setDebit(value);
                         }
                       }}
@@ -348,7 +349,7 @@ const AddDatainGrid = () => {
                       value={credit || ""}
                       onChange={(e) => {
                         const value = e.target.value;
-                         if (/^\d*\.?\d{0,2}$/.test(value)) {
+                        if (/^\d*\.?\d{0,2}$/.test(value)) {
                           setCredit(value);
                         }
                       }}
@@ -384,7 +385,7 @@ const AddDatainGrid = () => {
                       onChange={(event, newValue) => {
                         setReason(newValue);
                         if (newValue) {
-                          setReasonError(false); 
+                          setReasonError(false);
                         }
                       }}
                       renderInput={(params) => (
@@ -417,7 +418,7 @@ const AddDatainGrid = () => {
                       onChange={(event, newValue) => {
                         setCategory(newValue);
                         if (newValue) {
-                          setCategoryError(false); 
+                          setCategoryError(false);
                         }
                       }}
                       renderInput={(params) => (
@@ -425,7 +426,9 @@ const AddDatainGrid = () => {
                           {...params}
                           label="Category"
                           error={categoryError}
-                          helperText={reasonError ? "Category is Required" : ""}
+                          helperText={
+                            categoryError ? "Category is Required" : ""
+                          }
                           inputRef={categoryRef}
                           onKeyDown={(e) => handleNextFocus(e, paytypeRef)}
                         />
@@ -447,7 +450,7 @@ const AddDatainGrid = () => {
                       onChange={(event, newValue) => {
                         setPayType(newValue);
                         if (newValue) {
-                          setPayTypeError(false); 
+                          setPayTypeError(false);
                         }
                       }}
                       renderInput={(params) => (
@@ -455,7 +458,9 @@ const AddDatainGrid = () => {
                           {...params}
                           label="Payment Type"
                           error={oayTypeError}
-                          helperText={reasonError ? "Pay Type is Required" : ""}
+                          helperText={
+                            oayTypeError ? "Pay Type is Required" : ""
+                          }
                           inputRef={paytypeRef}
                           onKeyDown={(e) => handleNextFocus(e, commentRef)}
                         />
