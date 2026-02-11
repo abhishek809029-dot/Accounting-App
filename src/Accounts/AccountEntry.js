@@ -24,12 +24,15 @@ function AccountEntry() {
   const creditRef = useRef(null);
   const [reason, setReason] = useState(null);
   const reasonRef = useRef(null);
+  const [reasonError, setReasonError] = useState(false);
   const [comment, setComment] = useState("");
   const commentRef = useRef(null);
   const [category, setCategory] = useState(null);
   const categoryRef = useRef(null);
+  const [categoryError, setCategoryError] = useState(false);
   const [paytype, setPayType] = useState(null);
   const paytypeRef = useRef(null);
+  const [oayTypeError, setPayTypeError] = useState(false);
   const addRef = useRef(null);
   const [editSearchCode, setEditSearchCode] = useState(null);
   const [sno, setSno] = useState(1);
@@ -196,71 +199,47 @@ function AccountEntry() {
     setPayType(null);
   };
 
-  const handleDatainGrid = (mode, GridSearchCode) => {
-    debugger;
-    const SNo = mode === "add" ? sno : GridSearchCode;
-    const obj = {
-      SNo,
-      debit,
-      credit,
-      reasonCode: reason.Code,
-      reasonName: reason.Name,
-      comment,
-      categoryCode: category.Code,
-      categoryName: category.Name,
-      paytypeCode: paytype.Code,
-      paytypeName: paytype.Name,
-    };
-    switch (mode) {
-      case "add":
-        setGridData((prev) => [...prev, obj]);
-        setSno((prev) => prev + 1);
-        ClearValues();
-        debitRef.current?.focus();
-        break;
-
-      case "delete":
-        setGridData((prev) =>
-          prev.filter((item) => item.SNo !== GridSearchCode),
-        );
-        break;
-
-      case "edit":
-        const data = gridData.find((x) => x.SNo === GridSearchCode);
-        setDebit(data.debit);
-        setCredit(data.credit);
-        setReason({ Code: data.reasonCode, Name: data.reasonName });
-        setComment(data.comment);
-        setCategory({ Code: data.categoryCode, Name: data.categoryName });
-        setPayType({ Code: data.paytypeCode, Name: data.paytypeName });
-        // setGridData((prev) =>
-        //   prev.map((item) => (item.SNo === sno ? { ...item, ...obj } : item)),
-        // );
-        break;
-
-      default:
-        break;
-    }
-  };
-
-  const AddDatainGrid = () => {
-    const obj = {
-      SNo: sno,
-      debit,
-      credit,
-      reasonCode: reason.Code,
-      reasonName: reason.Name,
-      comment,
-      categoryCode: category.Code,
-      categoryName: category.Name,
-      paytypeCode: paytype.Code,
-      paytypeName: paytype.Name,
-    };
-    setGridData((prev) => [...prev, obj]);
-    setSno((prev) => prev + 1);
-    ClearValues();
+const AddDatainGrid = () => {
+  if (!debit && !credit) {
+    Swal.fire({
+      icon: "warning",
+      text: "Please enter either Debit or Credit amount.",
+    });
     debitRef.current?.focus();
+    return;
+  }
+  if (!reason) {
+    setReasonError(true);
+    reasonRef.current?.focus();
+    return;
+  }
+  if (!category) {
+    setCategoryError(true);
+    categoryRef.current?.focus();
+    return;
+  }
+  if (!paytype) {
+    setPayTypeError(true);
+    paytypeRef.current?.focus();
+    return;
+  }
+  const obj = {
+    SNo: sno,
+    debit,
+    credit,
+    reasonCode: reason?.Code,
+    reasonName: reason?.Name,
+    comment,
+    categoryCode: category?.Code,
+    categoryName: category?.Name,
+    paytypeCode: paytype?.Code,
+    paytypeName: paytype?.Name,
   };
+  setGridData(prev => [...prev, obj]);
+  setSno(prev => prev + 1);
+  ClearValues();
+  debitRef.current?.focus();
+};
 
   const DeleteDatainGrid = (GridSno) => {
     setGridData((prev) => prev.filter((item) => item.SNo !== GridSno));
@@ -275,11 +254,11 @@ function AccountEntry() {
     setComment(data.comment);
     setCategory({ Code: data.categoryCode, Name: data.categoryName });
     setPayType({ Code: data.paytypeCode, Name: data.paytypeName });
+    debitRef.current.focus();
   };
 
   const AddEditDatainGrid = () => {
-    setGridData((prev) => {
-      const updatedObj = {
+    const updatedObj = {
         SNo: editSearchCode,
         debit,
         credit,
@@ -291,17 +270,13 @@ function AccountEntry() {
         paytypeCode: paytype.Code,
         paytypeName: paytype.Name,
       };
-
-      //setEditSearchCode(null);
-
-      // if (index !== -1) {
-      return prev.map((item) =>
+    const UpdatedData = gridData.map((item) =>
         item.SNo === editSearchCode ? updatedObj : item,
       );
-      //}
-
-      //return [...prev, updatedObj];
-    });
+    setGridData(UpdatedData);
+    setEditSearchCode(null);
+    ClearValues();
+    debitRef.current.focus();
   };
 
   return (
@@ -342,13 +317,27 @@ function AccountEntry() {
                     <TextField
                       label="Debit"
                       value={debit || ""}
-                      onChange={(e) => setDebit(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                         if (/^\d*\.?\d{0,2}$/.test(value)) {
+                          setDebit(value);
+                        }
+                      }}
+                      onBlur={() => {
+                        if (debit !== "") {
+                          setDebit(Number(debit).toFixed(2));
+                        }
+                      }}
                       inputRef={debitRef}
                       onKeyDown={(e) => handleNextFocus(e, creditRef)}
                       disabled={disabled}
                       size="small"
                       variant="outlined"
                       fullWidth
+                      inputProps={{
+                        style: { textAlign: "right" },
+                        inputMode: "numeric",
+                      }}
                     />
                   </div>
                 </div>
@@ -357,13 +346,27 @@ function AccountEntry() {
                     <TextField
                       label="Credit"
                       value={credit || ""}
-                      onChange={(e) => setCredit(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                         if (/^\d*\.?\d{0,2}$/.test(value)) {
+                          setCredit(value);
+                        }
+                      }}
+                      onBlur={() => {
+                        if (debit !== "") {
+                          setDebit(Number(debit).toFixed(2));
+                        }
+                      }}
                       inputRef={creditRef}
                       onKeyDown={(e) => handleNextFocus(e, reasonRef)}
                       disabled={disabled}
                       size="small"
                       variant="outlined"
                       fullWidth
+                      inputProps={{
+                        style: { textAlign: "right" },
+                        inputMode: "numeric",
+                      }}
                     />
                   </div>
                 </div>
@@ -380,11 +383,16 @@ function AccountEntry() {
                       }
                       onChange={(event, newValue) => {
                         setReason(newValue);
+                        if (newValue) {
+                          setReasonError(false); 
+                        }
                       }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           label="Reason"
+                          error={reasonError}
+                          helperText={reasonError ? "Reason is Required" : ""}
                           inputRef={reasonRef}
                           onKeyDown={(e) => handleNextFocus(e, categoryRef)}
                         />
@@ -408,11 +416,16 @@ function AccountEntry() {
                       }
                       onChange={(event, newValue) => {
                         setCategory(newValue);
+                        if (newValue) {
+                          setCategoryError(false); 
+                        }
                       }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           label="Category"
+                          error={categoryError}
+                          helperText={reasonError ? "Category is Required" : ""}
                           inputRef={categoryRef}
                           onKeyDown={(e) => handleNextFocus(e, paytypeRef)}
                         />
@@ -433,11 +446,16 @@ function AccountEntry() {
                       }
                       onChange={(event, newValue) => {
                         setPayType(newValue);
+                        if (newValue) {
+                          setPayTypeError(false); 
+                        }
                       }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           label="Payment Type"
+                          error={oayTypeError}
+                          helperText={reasonError ? "Pay Type is Required" : ""}
                           inputRef={paytypeRef}
                           onKeyDown={(e) => handleNextFocus(e, commentRef)}
                         />
