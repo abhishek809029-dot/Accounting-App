@@ -11,7 +11,7 @@ import {
   handleNextFocus,
   formattedDate,
 } from "../GlobalJS/GlobalFunctions";
-const url = "/AccountsAPI/Accounts/CategoryMaster";
+const url = "/AccountsAPI/Accounts/AccountEntry";
 const FetchDataUrl = "/AccountsAPI/Accounts/FetchAccountEntryData";
 
 function AccountEntry() {
@@ -199,7 +199,7 @@ function AccountEntry() {
     setPayType(null);
   };
 
-  const AddDatainGrid = () => {
+  const AddDatainGrid = async () => {
     if (!debit && !credit) {
       Swal.fire({
         icon: "warning",
@@ -223,22 +223,45 @@ function AccountEntry() {
       paytypeRef.current?.focus();
       return;
     }
+
     const obj = {
-      SNo: sno,
-      debit,
-      credit,
-      reasonCode: reason?.Code,
-      reasonName: reason?.Name,
-      comment,
-      categoryCode: category?.Code,
-      categoryName: category?.Name,
-      paytypeCode: paytype?.Code,
-      paytypeName: paytype?.Name,
-    };
-    setGridData((prev) => [...prev, obj]);
-    setSno((prev) => prev + 1);
-    ClearValues();
-    debitRef.current?.focus();
+      mode : "save",
+      SearchCode : "",
+      Date : date,
+      Debit : debit,
+      Credit : credit,
+      ReasonCode : reason?.Code,
+      CategoryCode : category?.Code,
+      PayTypeCode : paytype?.Code,
+      Comment : comment
+    }
+
+    const response = await axios.post(url, obj);
+      if (response.data.success) {
+        ClearValues();
+        debitRef.current?.focus();
+      }
+      else
+      {
+          Swal.fire({
+          icon: "error",
+          text: response.data.message || "Something went wrong!",
+        });
+      }
+    // const obj = {
+    //   SNo: sno,
+    //   debit,
+    //   credit,
+    //   reasonCode: reason?.Code,
+    //   reasonName: reason?.Name,
+    //   comment,
+    //   categoryCode: category?.Code,
+    //   categoryName: category?.Name,
+    //   paytypeCode: paytype?.Code,
+    //   paytypeName: paytype?.Name,
+    // };
+    // setGridData((prev) => [...prev, obj]);
+    // setSno((prev) => prev + 1);
   };
 
   const DeleteDatainGrid = (GridSno) => {
