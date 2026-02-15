@@ -16,7 +16,7 @@ const FetchDataUrl = "/AccountsAPI/Accounts/FetchAccountEntryData";
 
 function AccountEntry() {
   const [activeButtons, setActiveButtons] = useState(["add", "find"]);
-  const [name, setName] = useState("");
+  //const [name, setName] = useState("");
   const nameRef = useRef(null);
   const [date, setDate] = useState(getCurrentDate());
   const dateRef = useRef(null);
@@ -37,7 +37,7 @@ function AccountEntry() {
   const [oayTypeError, setPayTypeError] = useState(false);
   const addRef = useRef(null);
   const [editSearchCode, setEditSearchCode] = useState(null);
-  const [sno, setSno] = useState(1);
+  //const [sno, setSno] = useState(1);
   const [searchCode, setSearchCode] = useState("");
   const [reasonArray, setReasonArray] = useState([]);
   const [categoryArray, setCategoryArray] = useState([]);
@@ -75,6 +75,9 @@ function AccountEntry() {
           case "c":
             action = "cancel";
             break;
+          case "r":
+            action = "refresh";
+            break;
           default:
             return;
         }
@@ -87,7 +90,7 @@ function AccountEntry() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeButtons, name, searchCode]);
+  }, [activeButtons, searchCode]);
 
   const handleToolbarAction = (id) => {
     if (id === "add" || id === "edit") {
@@ -97,83 +100,67 @@ function AccountEntry() {
       }, 0);
       setActiveButtons(["save", "refresh", "cancel"]);
     } else if (id === "cancel") {
-      setName("");
       setSearchCode("");
       setDisabled(true);
       setActiveButtons(["add", "find"]);
     } else {
-      handleCategoryMast(id);
+      handleAccountEntry(id);
+    }
+  };
+
+  const handleAccountEntry = (mode) => {
+    switch (mode) {
+      case "save":
+        ClearValues();
+        setGridData(null);
+        searchCode !== ""
+          ? handleToolbarAction("cancel")
+          : dateRef.current.focus();
+        break;
+      case "refresh":
+        LoadData();
+        break;
+      case "find":
+        LoadFindData();
+        break;
+      default:
+        break;
+    }
+  };
+
+  const LoadFindData = async () => {
+    const obj = {
+      mode: "find",
+      SearchCode: "",
+      Date: date,
+      UserName: "ABHISHEK",
+      Debit: debit || 0,
+      Credit: credit || 0,
+      Comment: comment,
+      ReasonCode: reason?.Code,
+      CategoryCode: category?.Code,
+      PayTypeCode: paytype?.Code,
+    };
+    const response = await axios.post(url, obj);
+    if (response.data.success) {
+      setFindData(response.data.data);
+      setIsOpen(true);
+    } else {
+      Swal.fire({
+        icon: "error",
+        text: response.data.message || "Something went wrong!",
+      });
     }
   };
 
   const handleDataSelection = (item) => {
     setIsOpen(false);
-    setSearchCode(item.Code);
-    setName(item.Name);
+    setSearchCode(item.Date);
+    LoadGridData();
     setActiveButtons(["edit", "delete", "cancel"]);
   };
 
-  const handleCategoryMast = async (mode) => {
-    try {
-      if (mode === "save" && name === "") {
-        Swal.fire({
-          icon: "warning",
-          text: "Category Name is Required ...",
-        });
-        return false;
-      }
-      const obj = {
-        mode: mode,
-        SearchCode: searchCode,
-        Name: name,
-        UserName: "ABHISHEK",
-      };
-      const response = await axios.post(url, obj);
-      if (response.data.success) {
-        switch (mode) {
-          case "find":
-            setFindData(response.data.data);
-            setIsOpen(true);
-            break;
-          case "save":
-            if (searchCode === "") {
-              setName("");
-              setTimeout(() => {
-                nameRef.current?.focus();
-              }, 0);
-            } else {
-              setName("");
-              setSearchCode("");
-              setDisabled(true);
-              setActiveButtons(["add", "find"]);
-            }
-            break;
-          case "delete":
-            setName("");
-            setSearchCode("");
-            setActiveButtons(["add", "find"]);
-            break;
-          default:
-            setName("");
-            setDisabled(true);
-            setActiveButtons(["add", "find"]);
-            break;
-        }
-      } else {
-        Swal.fire({
-          icon: "error",
-          text: response.data.message || "Something went wrong!",
-        });
-      }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        text: error || "Something went wrong!",
-      });
-    }
-  };
-
-  const LoadData = async (mode) => {
+  const LoadData = async () => {
     try {
       const obj = {
         UserName: "ABHISHEK",
@@ -186,6 +173,30 @@ function AccountEntry() {
       Swal.fire({
         icon: "error",
         text: error || "Something went wrong!",
+      });
+    }
+  };
+
+  const LoadGridData = async () => {
+    const obj = {
+      mode: "datefind",
+      SearchCode: "",
+      Date: date,
+      UserName: "ABHISHEK",
+      Debit: debit || 0,
+      Credit: credit || 0,
+      Comment: comment,
+      ReasonCode: reason?.Code,
+      CategoryCode: category?.Code,
+      PayTypeCode: paytype?.Code,
+    };
+    const response = await axios.post(url, obj);
+    if (response.data.success) {
+      setGridData(response.data.data);
+    } else {
+      Swal.fire({
+        icon: "error",
+        text: response.data.message || "Something went wrong!",
       });
     }
   };
@@ -225,29 +236,28 @@ function AccountEntry() {
     }
 
     const obj = {
-      mode : "save",
-      SearchCode : "",
-      Date : date,
-      Debit : debit,
-      Credit : credit,
-      ReasonCode : reason?.Code,
-      CategoryCode : category?.Code,
-      PayTypeCode : paytype?.Code,
-      Comment : comment
-    }
-
+      mode: "add",
+      SearchCode: "",
+      Date: date,
+      UserName: "ABHISHEK",
+      Debit: debit || 0,
+      Credit: credit || 0,
+      Comment: comment,
+      ReasonCode: reason?.Code,
+      CategoryCode: category?.Code,
+      PayTypeCode: paytype?.Code,
+    };
     const response = await axios.post(url, obj);
-      if (response.data.success) {
-        ClearValues();
-        debitRef.current?.focus();
-      }
-      else
-      {
-          Swal.fire({
-          icon: "error",
-          text: response.data.message || "Something went wrong!",
-        });
-      }
+    if (response.data.success) {
+      ClearValues();
+      LoadGridData();
+      debitRef.current?.focus();
+    } else {
+      Swal.fire({
+        icon: "error",
+        text: response.data.message || "Something went wrong!",
+      });
+    }
     // const obj = {
     //   SNo: sno,
     //   debit,
@@ -264,43 +274,86 @@ function AccountEntry() {
     // setSno((prev) => prev + 1);
   };
 
-  const DeleteDatainGrid = (GridSno) => {
-    setGridData((prev) => prev.filter((item) => item.SNo !== GridSno));
-    debitRef.current.focus();
-  };
-
-  const FillDataFromGrid = (GridSno) => {
-    setEditSearchCode(GridSno);
-    const data = gridData.find((x) => x.SNo === GridSno);
-    setDebit(data.debit);
-    setCredit(data.credit);
-    setReason({ Code: data.reasonCode, Name: data.reasonName });
-    setComment(data.comment);
-    setCategory({ Code: data.categoryCode, Name: data.categoryName });
-    setPayType({ Code: data.paytypeCode, Name: data.paytypeName });
-    debitRef.current.focus();
-  };
-
-  const AddEditDatainGrid = () => {
-    const updatedObj = {
-      SNo: editSearchCode,
-      debit,
-      credit,
-      reasonCode: reason.Code,
-      reasonName: reason.Name,
-      comment,
-      categoryCode: category.Code,
-      categoryName: category.Name,
-      paytypeCode: paytype.Code,
-      paytypeName: paytype.Name,
+  const DeleteDatainGrid = async (GridSearchCode) => {
+    // setGridData((prev) => prev.filter((item) => item.SNo !== GridSearchCode));
+    // debitRef.current.focus();
+    const obj = {
+      mode: "delete",
+      SearchCode: GridSearchCode,
+      Date: date,
+      UserName: "ABHISHEK",
+      Debit: debit || 0,
+      Credit: credit || 0,
+      Comment: comment,
+      ReasonCode: reason?.Code,
+      CategoryCode: category?.Code,
+      PayTypeCode: paytype?.Code,
     };
-    const UpdatedData = gridData.map((item) =>
-      item.SNo === editSearchCode ? updatedObj : item,
-    );
-    setGridData(UpdatedData);
-    setEditSearchCode(null);
-    ClearValues();
+    const response = await axios.post(url, obj);
+    if (response.data.success) {
+      LoadGridData();
+      debitRef.current.focus();
+    } else {
+      Swal.fire({
+        icon: "error",
+        text: response.data.message || "Something went wrong!",
+      });
+    }
+  };
+
+  const FillDataFromGrid = (GridSearchCode) => {
+    setEditSearchCode(GridSearchCode);
+    const data = gridData.find((x) => x.Code === GridSearchCode);
+    setDebit(data.Debit);
+    setCredit(data.Credit);
+    setReason({ Code: data.ReasonCode, Name: data.ReasonName });
+    setComment(data.Comment);
+    setCategory({ Code: data.CategoryCode, Name: data.CategoryName });
+    setPayType({ Code: data.PaymentTypeCode, Name: data.PayTypeName });
     debitRef.current.focus();
+  };
+
+  const AddEditDatainGrid = async () => {
+    // const updatedObj = {
+    //   SNo: editSearchCode,
+    //   debit,
+    //   credit,
+    //   reasonCode: reason.Code,
+    //   reasonName: reason.Name,
+    //   comment,
+    //   categoryCode: category.Code,
+    //   categoryName: category.Name,
+    //   paytypeCode: paytype.Code,
+    //   paytypeName: paytype.Name,
+    // };
+    // const UpdatedData = gridData.map((item) =>
+    //   item.SNo === editSearchCode ? updatedObj : item,
+    // );
+    //setGridData(UpdatedData);
+    const obj = {
+      mode: "edit",
+      SearchCode: editSearchCode,
+      Date: date,
+      UserName: "ABHISHEK",
+      Debit: debit || 0,
+      Credit: credit || 0,
+      Comment: comment,
+      ReasonCode: reason?.Code,
+      CategoryCode: category?.Code,
+      PayTypeCode: paytype?.Code,
+    };
+    const response = await axios.post(url, obj);
+    if (response.data.success) {
+      LoadGridData();
+      setEditSearchCode(null);
+      ClearValues();
+      debitRef.current.focus();
+    } else {
+      Swal.fire({
+        icon: "error",
+        text: response.data.message || "Something went wrong!",
+      });
+    }
   };
 
   return (
@@ -323,7 +376,7 @@ function AccountEntry() {
                 value={date || ""}
                 onBlur={() => setDate(formattedDate(date))}
                 onChange={(e) => setDate(e.target.value)}
-                onKeyDown={(e) => handleNextFocus(e, debitRef)}
+                onKeyDown={(e) => handleNextFocus(e, debitRef, LoadGridData)}
                 inputRef={dateRef}
                 disabled={disabled}
                 size="small"
@@ -555,7 +608,7 @@ function AccountEntry() {
                           <td>
                             <button
                               type="button"
-                              onClick={() => FillDataFromGrid(row.SNo)}
+                              onClick={() => FillDataFromGrid(row.Code)}
                               className="btn btn-success"
                             >
                               Edit
@@ -564,18 +617,18 @@ function AccountEntry() {
                           <td>
                             <button
                               type="button"
-                              onClick={() => DeleteDatainGrid(row.SNo)}
+                              onClick={() => DeleteDatainGrid(row.Code)}
                               className="btn btn-danger"
                             >
                               Delete
                             </button>
                           </td>
-                          <td>{row.debit}</td>
-                          <td>{row.credit}</td>
-                          <td>{row.reasonName}</td>
-                          <td>{row.comment}</td>
-                          <td>{row.categoryName}</td>
-                          <td>{row.paytypeName}</td>
+                          <td>{row.Debit}</td>
+                          <td>{row.Credit}</td>
+                          <td>{row.ReasonName}</td>
+                          <td>{row.Comment}</td>
+                          <td>{row.CategoryName}</td>
+                          <td>{row.PayTypeName}</td>
                         </tr>
                       ))}
                   </tbody>
@@ -588,7 +641,7 @@ function AccountEntry() {
       {isOpen && (
         <Find
           data={findData}
-          title="Category Master"
+          title="Account Entry"
           onClose={() => setIsOpen(false)}
           onSelect={handleDataSelection}
         />
