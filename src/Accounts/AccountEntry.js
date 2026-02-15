@@ -100,6 +100,7 @@ function AccountEntry() {
       }, 0);
       setActiveButtons(["save", "refresh", "cancel"]);
     } else if (id === "cancel") {
+      setDate(getCurrentDate());
       setSearchCode("");
       setDisabled(true);
       setActiveButtons(["add", "find"]);
@@ -113,9 +114,12 @@ function AccountEntry() {
       case "save":
         ClearValues();
         setGridData(null);
-        searchCode !== ""
-          ? handleToolbarAction("cancel")
-          : dateRef.current.focus();
+        if (searchCode !== "") {
+          handleToolbarAction("cancel");
+          setDate(getCurrentDate());
+        } else {
+          dateRef.current.focus();
+        }
         break;
       case "refresh":
         LoadData();
@@ -153,11 +157,12 @@ function AccountEntry() {
     }
   };
 
-  const handleDataSelection = (item) => {
+  const handleDataSelection = async (item) => {
     setIsOpen(false);
     setSearchCode(item.Date);
-    LoadGridData();
+    await setDate(item.Date);
     setActiveButtons(["edit", "delete", "cancel"]);
+    LoadGridData();
   };
 
   const LoadData = async () => {
@@ -376,7 +381,7 @@ function AccountEntry() {
                 value={date || ""}
                 onBlur={() => setDate(formattedDate(date))}
                 onChange={(e) => setDate(e.target.value)}
-                onKeyDown={(e) => handleNextFocus(e, debitRef, LoadGridData)}
+                onKeyDown={(e) => handleNextFocus(e, debitRef)}
                 inputRef={dateRef}
                 disabled={disabled}
                 size="small"
