@@ -102,6 +102,7 @@ function AccountEntry() {
     } else if (id === "cancel") {
       setDate(getCurrentDate());
       setSearchCode("");
+      setGridData([]);
       setDisabled(true);
       setActiveButtons(["add", "find"]);
     } else {
@@ -160,9 +161,9 @@ function AccountEntry() {
   const handleDataSelection = async (item) => {
     setIsOpen(false);
     setSearchCode(item.Date);
-    await setDate(item.Date);
+    setDate(item.Date);
     setActiveButtons(["edit", "delete", "cancel"]);
-    LoadGridData();
+    LoadGridData(item.Date);
   };
 
   const LoadData = async () => {
@@ -182,11 +183,11 @@ function AccountEntry() {
     }
   };
 
-  const LoadGridData = async () => {
+  const LoadGridData = async (filterDate) => {
     const obj = {
       mode: "datefind",
       SearchCode: "",
-      Date: date,
+      Date: filterDate != undefined ? filterDate : date,
       UserName: "ABHISHEK",
       Debit: debit || 0,
       Credit: credit || 0,
