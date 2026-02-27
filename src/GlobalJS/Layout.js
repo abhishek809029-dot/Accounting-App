@@ -6,8 +6,15 @@ import CategoryMaster from "../Accounts/CategoryMaster";
 import ReasonMaster from "../Accounts/ReasonMaster";
 import PaymentTypeMaster from "../Accounts/PaymentTypeMaster";
 import AccountEntry from "../Accounts/AccountEntry";
+import Dashboard from "../Accounts/Dashboard";
 
 const menuConfig = [
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    icon: "bi-house-door",
+    component: <Dashboard />,
+  },
   {
     id: "accountEntry",
     title: "Account Entry",

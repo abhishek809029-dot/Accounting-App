@@ -21,6 +21,34 @@ export const handleNextFocus = (e, nextRef, action) => {
   }
 };
 
+export const handleNextFocusLeft = (e, nextRef, action) => {
+  if (e.key === "ArrowLeft") {
+    e.preventDefault();
+    if (nextRef && nextRef.current && action) {
+      nextRef.current.focus();
+      action();
+    } else {
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  }
+};
+
+export const handleNextFocusRight = (e, nextRef, action) => {
+  if (e.key === "ArrowRight") {
+    e.preventDefault();
+    if (nextRef && nextRef.current && action) {
+      nextRef.current.focus();
+      action();
+    } else {
+      if (nextRef && nextRef.current) {
+        nextRef.current.focus();
+      }
+    }
+  }
+};
+
 export const formattedDate = (inputDate) => {
   if (!inputDate || inputDate.trim() === "") return "";
 
