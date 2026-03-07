@@ -175,3 +175,9 @@ export const formattedDate = (inputDate) => {
 
   return `${String(mDay).padStart(2, "0")}/${mMonth}/${mYear}`;
 };
+
+export const getCurrentMonth = () => {
+  const today = new Date();
+  return today.toISOString().slice(0, 7); 
+};
+

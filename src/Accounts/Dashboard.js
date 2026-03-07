@@ -1,4 +1,4 @@
-import React, { useEffect, useRef,useState } from 'react'
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import TextField from "@mui/material/TextField";
@@ -7,24 +7,16 @@ import { TabulatorFull as Tabulator } from "tabulator-tables";
 import {
   handleNextFocus,
   handleNextFocusLeft,
-  handleNextFocusRight
+  handleNextFocusRight,
+  getCurrentMonth,
 } from "../GlobalJS/GlobalFunctions";
 import "tabulator-tables/dist/css/tabulator.min.css";
-
 const FetchDataUrl = "/AccountsAPI/Accounts/FetchAccountEntryData";
-
-const MOCK_DATA = [
-  { date: "25/Feb/2026", debit: 0, credit: 2000, reason: "Test 1", category: "Test Cat 1", payment: "Test Pay 1" },
-  { date: "25/Feb/2026", debit: 110, credit: 0, reason: "Test 2", category: "Test Cat 2", payment: "Test Pay 3" },
-  { date: "26/Feb/2026", debit: 0, credit: 2000, reason: "Test 3", category: "Test Cat 2", payment: "Test Pay 5" },
-  { date: "26/Feb/2026", debit: 200, credit: 0, reason: "Test 1", category: "Test Cat 1", payment: "Test Pay 1" },
-  { date: "26/Feb/2026", debit: 500, credit: 0, reason: "Test 2", category: "Test Cat 1", payment: "Test Pay 1" },
-  { date: "27/Feb/2026", debit: 800, credit: 0, reason: "Test 1", category: "Test Cat 2", payment: "Test Pay 7" },
-  { date: "27/Feb/2026", debit: 0, credit: 2000, reason: "Test 4", category: "Test Cat 1", payment: "Test Pay 1" },
-  { date: "27/Feb/2026", debit: 1200, credit: 0, reason: "Test 1", category: "Test Cat 1", payment: "Test Pay 2" },
-];
+const FetchGridData = "/AccountsAPI/Accounts/GetDashboardData";
 
 function Dashboard() {
+  const [date, setDate] = useState(getCurrentMonth);
+  const dateRef = useRef(null);
   const [reason, setReason] = useState(null);
   const reasonRef = useRef(null);
   const [category, setCategory] = useState(null);
@@ -32,15 +24,19 @@ function Dashboard() {
   const [paytype, setPayType] = useState(null);
   const paytypeRef = useRef(null);
   const [reasonArray, setReasonArray] = useState([]);
-    const [categoryArray, setCategoryArray] = useState([]);
-    const [payTypeArray, setPayTypeArray] = useState([]);
+  const [categoryArray, setCategoryArray] = useState([]);
+  const [payTypeArray, setPayTypeArray] = useState([]);
   const tableRef = useRef(null);
 
   useEffect(() => {
-    reasonRef.current.focus();
+    dateRef.current.focus();
     LoadData();
-    initalizegrid();
+    LoadGridData();
   }, []);
+
+  useEffect(() => {
+    LoadGridData();
+  }, [date, reason, category, paytype]);
 
   const LoadData = async () => {
     try {
@@ -59,36 +55,121 @@ function Dashboard() {
     }
   };
 
-const initalizegrid = () => {
-  const table = new Tabulator(tableRef.current, {
+  const LoadGridData = async () => {
+    try {
+      debugger;
+      let monthYear = date.split("-");
+      const obj = {
+        Month: parseInt(monthYear[1]),
+        Year: parseInt(monthYear[0]),
+        ReasonCode: reason?.Code ?? "",
+        CategoryCode: category?.Code ?? "",
+        PayTypeCode: paytype?.Code ?? "",
+      };
+      const response = await axios.post(FetchGridData, obj);
+      if (response.data.success) {
+        initalizegrid(response.data.data);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        text: error || "Something went wrong!",
+      });
+    }
+  };
+
+  const initalizegrid = (data) => {
+    const table = new Tabulator(tableRef.current, {
       layout: "fitColumns",
-      data: MOCK_DATA,
+      height: "400px",
+      data: data,
       columns: [
-        { title: "S.No", field: "sno", formatter:"rownum", width:70},
-          { title: "Date", field: "date", sorter: "date", width:120 },
-          { title: "Debit", field: "debit", sorter: "string", width:120,hozAlign: "right", formatter: "money" },
-          { title: "Credit", field: "credit", sorter: "string", width:120,hozAlign: "right", formatter: "money" },
-          { title: "Comment", field: "comment", sorter: "string",minWidth:150 },
-          { title: "Reason", field: "reason", sorter: "string",width:200 },
-          { title: "Category", field: "category", sorter: "string", width:180 },
-          { title: "Payment", field: "payment", sorter: "string", width:140 },
-      ]
+        { title: "Code", field: "Code", visible: false },
+        { title: "S.No", field: "sno", formatter: "rownum", width: 70 },
+        { title: "Date", field: "Date", sorter: "date", width: 120 },
+        {
+          title: "Debit",
+          field: "Debit",
+          sorter: "string",
+          width: 120,
+          hozAlign: "right",
+          formatter: "money",
+          bottomCalc: "sum",
+          bottomCalcFormatter: "money",
+        },
+        {
+          title: "Credit",
+          field: "Credit",
+          sorter: "string",
+          width: 120,
+          hozAlign: "right",
+          formatter: "money",
+          bottomCalc: "sum",
+          bottomCalcFormatter: "money",
+        },
+        { title: "Comment", field: "Comment", sorter: "string", minWidth: 150 },
+        {
+          title: "Reason",
+          field: "ReasonName",
+          sorter: "string",
+          width: 200,
+          bottomCalc: function (values, data) {
+            let totalDebit = 0;
+            let totalCredit = 0;
+            data.forEach((row) => {
+              totalDebit += Number(row.Debit || 0);
+              totalCredit += Number(row.Credit || 0);
+            });
+            return totalCredit - totalDebit;
+          },
+          bottomCalcFormatter: function (cell) {
+            let value = cell.getValue();
+            return `<div style="width:100%; text-align:right;">
+              ${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            </div>`;
+          },
+        },
+        {
+          title: "Category",
+          field: "CategoryName",
+          sorter: "string",
+          width: 180,
+        },
+        {
+          title: "Payment",
+          field: "PayTypeName",
+          sorter: "string",
+          width: 140,
+        },
+      ],
     });
-}
+  };
 
   return (
-   <div className="container-fluid mt-3">
+    <div className="container-fluid mt-3">
       <div className="card shadow-sm">
         <div className="card-body">
           <div className="row mb-2">
-            <div className="col-md-8">
+            <div className="col-md-9">
               <div className="row mb-3">
-                <div className="col-md-4">
+                <div className="col-md-3">
+                  <input
+                    type="month"
+                    ref={dateRef}
+                    className="form-control"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    onKeyDown={(e) => {
+                      handleNextFocusRight(e, reasonRef);
+                      handleNextFocus(e, reasonRef);
+                    }}
+                  />
+                </div>
+                <div className="col-md-3">
                   <div className="form-group">
                     <Autocomplete
                       options={reasonArray}
                       value={reason}
-                      
                       size="small"
                       getOptionLabel={(option) => option.Name}
                       isOptionEqualToValue={(option, value) =>
@@ -104,19 +185,18 @@ const initalizegrid = () => {
                           inputRef={reasonRef}
                           onKeyDown={(e) => {
                             handleNextFocusRight(e, categoryRef);
-                            handleNextFocus(e, categoryRef)
+                            handleNextFocusLeft(e, dateRef);
                           }}
                         />
                       )}
                     />
                   </div>
                 </div>
-                <div className="col-md-4">
+                <div className="col-md-3">
                   <div className="form-group">
                     <Autocomplete
                       options={categoryArray}
                       value={category}
-                      
                       size="small"
                       getOptionLabel={(option) => option.Name}
                       isOptionEqualToValue={(option, value) =>
@@ -132,20 +212,18 @@ const initalizegrid = () => {
                           inputRef={categoryRef}
                           onKeyDown={(e) => {
                             handleNextFocusRight(e, paytypeRef);
-                            handleNextFocusLeft(e,reasonRef);
-                            handleNextFocus(e, paytypeRef)
+                            handleNextFocusLeft(e, reasonRef);
                           }}
                         />
                       )}
                     />
                   </div>
                 </div>
-                <div className="col-md-4">
+                <div className="col-md-3">
                   <div className="form-group">
                     <Autocomplete
                       options={payTypeArray}
                       value={paytype}
-                      
                       size="small"
                       getOptionLabel={(option) => option.Name}
                       isOptionEqualToValue={(option, value) =>
@@ -177,7 +255,7 @@ const initalizegrid = () => {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;

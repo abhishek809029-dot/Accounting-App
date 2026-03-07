@@ -1,3 +1,11 @@
+.form-control:focus {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: none;
+}
+
 :root {
   --sidebar-width: 250px;
   --sidebar-bg: #1e293b;
