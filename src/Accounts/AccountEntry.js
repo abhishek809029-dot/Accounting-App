@@ -138,7 +138,7 @@ function AccountEntry() {
       mode: "find",
       SearchCode: "",
       Date: date,
-      UserName: "ABHISHEK",
+      UserName: sessionStorage.getItem("UserName"),
       Debit: debit || 0,
       Credit: credit || 0,
       Comment: comment,
@@ -169,7 +169,7 @@ function AccountEntry() {
   const LoadData = async () => {
     try {
       const obj = {
-        UserName: "ABHISHEK",
+        UserName: sessionStorage.getItem("UserName"),
       };
       const response = await axios.post(FetchDataUrl, obj);
       setReasonArray(response.data.Reason || []);
@@ -188,7 +188,7 @@ function AccountEntry() {
       mode: "datefind",
       SearchCode: "",
       Date: filterDate != undefined ? filterDate : date,
-      UserName: "ABHISHEK",
+      UserName: sessionStorage.getItem("UserName"),
       Debit: debit || 0,
       Credit: credit || 0,
       Comment: comment,
@@ -245,7 +245,7 @@ function AccountEntry() {
       mode: "add",
       SearchCode: "",
       Date: date,
-      UserName: "ABHISHEK",
+      UserName: sessionStorage.getItem("UserName"),
       Debit: debit || 0,
       Credit: credit || 0,
       Comment: comment,
@@ -287,7 +287,7 @@ function AccountEntry() {
       mode: "delete",
       SearchCode: GridSearchCode,
       Date: date,
-      UserName: "ABHISHEK",
+      UserName: sessionStorage.getItem("UserName"),
       Debit: debit || 0,
       Credit: credit || 0,
       Comment: comment,
@@ -340,7 +340,7 @@ function AccountEntry() {
       mode: "edit",
       SearchCode: editSearchCode,
       Date: date,
-      UserName: "ABHISHEK",
+      UserName: sessionStorage.getItem("UserName"),
       Debit: debit || 0,
       Credit: credit || 0,
       Comment: comment,
@@ -437,7 +437,7 @@ function AccountEntry() {
                       }}
                       onBlur={() => {
                         if (debit !== "") {
-                          setDebit(Number(debit).toFixed(2));
+                          setCredit(Number(credit).toFixed(2));
                         }
                       }}
                       inputRef={creditRef}

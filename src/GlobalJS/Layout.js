@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../GlobalCSS/Layout.css";
@@ -7,6 +8,8 @@ import ReasonMaster from "../Accounts/ReasonMaster";
 import PaymentTypeMaster from "../Accounts/PaymentTypeMaster";
 import AccountEntry from "../Accounts/AccountEntry";
 import Dashboard from "../Accounts/Dashboard";
+import ExcelImport from "../Accounts/ExcelImport";
+
 
 const menuConfig = [
   {
@@ -20,6 +23,12 @@ const menuConfig = [
     title: "Account Entry",
     icon: "bi-house-door",
     component: <AccountEntry />,
+  },
+  {
+    id: "excelImport",
+    title: "Excel Import",
+    icon: "bi-house-door",
+    component: <ExcelImport />,
   },
   {
     id: "categoryMaster",
@@ -46,8 +55,21 @@ const Layout = () => {
   const [activePageId, setActivePageId] = useState(null);
   const [expandedMenus, setExpandedMenus] = useState({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [UserName,setUserName] = useState(null);
+  const navigate = useNavigate();
 
-  // Helper function to find the menu object (including the component) in the nested config
+useEffect(() => {
+  let uname = sessionStorage.getItem("UserName");
+  if(uname)
+  {
+setUserName(uname);
+  }
+  else
+  {
+    navigate("/");
+  }
+},[]);
+
   const findMenuItem = (id, items = menuConfig) => {
     for (const item of items) {
       if (item.id === id) return item;
@@ -89,7 +111,6 @@ const Layout = () => {
     }
   };
 
-  // Determine which component to render
   const activeMenuObj = findMenuItem(activePageId);
 
   return (
@@ -212,12 +233,12 @@ const Layout = () => {
                 AT
               </div> */}
               <img
-                src="https://ui-avatars.com/api/?name=AT&background=3b82f6&color=fff"
+                src={`https://ui-avatars.com/api/?name=${sessionStorage.getItem("ShortName")}&background=3b82f6&color=fff`}
                 alt="user"
               />
-              <span className="user-name">ABHISHEK</span>
+              <span className="user-name">{UserName}</span>
             </div>
-            <button className="logout-btn">
+            <button className="logout-btn" onClick={() => {navigate("/");sessionStorage.setItem("UserName", "");}}>
               <i className="bi bi-box-arrow-right logout-icon"></i>
               <span className="logout-text">Logout</span>
             </button>

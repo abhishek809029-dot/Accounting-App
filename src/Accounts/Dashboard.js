@@ -41,7 +41,7 @@ function Dashboard() {
   const LoadData = async () => {
     try {
       const obj = {
-        UserName: "ABHISHEK",
+        UserName: sessionStorage.getItem("UserName"),
       };
       const response = await axios.post(FetchDataUrl, obj);
       setReasonArray(response.data.Reason || []);
@@ -57,14 +57,13 @@ function Dashboard() {
 
   const LoadGridData = async () => {
     try {
-      debugger;
       let monthYear = date.split("-");
       const obj = {
         Month: parseInt(monthYear[1]),
         Year: parseInt(monthYear[0]),
         ReasonCode: reason?.Code ?? "",
         CategoryCode: category?.Code ?? "",
-        PayTypeCode: paytype?.Code ?? "",
+        PayTypeCode: paytype?.Code ?? ""
       };
       const response = await axios.post(FetchGridData, obj);
       if (response.data.success) {

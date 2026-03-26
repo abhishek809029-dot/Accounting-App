@@ -90,7 +90,7 @@ function CategoryMaster() {
         mode: mode,
         SearchCode: searchCode,
         Name: name,
-        UserName: "ABHISHEK",
+        UserName: sessionStorage.getItem("UserName"),
       };
       const response = await axios.post(url, obj);
       if (response.data.success) {
