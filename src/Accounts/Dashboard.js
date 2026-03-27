@@ -63,11 +63,16 @@ function Dashboard() {
         Year: parseInt(monthYear[0]),
         ReasonCode: reason?.Code ?? "",
         CategoryCode: category?.Code ?? "",
-        PayTypeCode: paytype?.Code ?? ""
+        PayTypeCode: paytype?.Code ?? "",
+        UserName: sessionStorage.getItem("UserName")
       };
       const response = await axios.post(FetchGridData, obj);
       if (response.data.success) {
         initalizegrid(response.data.data);
+      }
+      else
+      {
+        initalizegrid([]);
       }
     } catch (error) {
       Swal.fire({

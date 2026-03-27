@@ -9,7 +9,9 @@ import PaymentTypeMaster from "../Accounts/PaymentTypeMaster";
 import AccountEntry from "../Accounts/AccountEntry";
 import Dashboard from "../Accounts/Dashboard";
 import ExcelImport from "../Accounts/ExcelImport";
-
+import SundryDebtor from "../Accounts/SundryDebtor";
+import BalanceSheet from "../Accounts/BalanceSheet";
+import RemoveMonthData from "../Accounts/RemoveMonthData";
 
 const menuConfig = [
   {
@@ -17,6 +19,18 @@ const menuConfig = [
     title: "Dashboard",
     icon: "bi-house-door",
     component: <Dashboard />,
+  },
+  {
+    id: "balanceSheet",
+    title: "Balance Sheet",
+    icon: "bi-house-door",
+    component: <BalanceSheet />,
+  },
+  {
+    id: "sundryDebtor",
+    title: "Sundry Debtor",
+    icon: "bi-house-door",
+    component: <SundryDebtor />,
   },
   {
     id: "accountEntry",
@@ -29,6 +43,12 @@ const menuConfig = [
     title: "Excel Import",
     icon: "bi-house-door",
     component: <ExcelImport />,
+  },
+  {
+    id: "removeMonthData",
+    title: "Remove Month Data",
+    icon: "bi-house-door",
+    component: <RemoveMonthData />,
   },
   {
     id: "categoryMaster",
