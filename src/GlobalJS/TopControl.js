@@ -75,7 +75,7 @@ const TopControl = ({ enabledButtons, onAction }) => {
 
   return (
     <div
-      className="toolbar-container sticky-top"
+      className="toolbar-container"
       style={{ backgroundColor: "#f5f5f5 !important" }}
     >
       <div className="container-fluid px-2 py-1 border-bottom shadow-sm">

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Button from "@mui/material/Button";
-import "./BalanceSheet.css";
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import {
   handleNextFocusLeft,
@@ -14,7 +13,6 @@ const FetchGridData = "/AccountsAPI/Accounts/MonthwiseBalance";
 
 function BalanceSheet() {
   const [date, setDate] = useState(getCurrentMonth);
-  const [data, setData] = useState([]);
   const dateRef = useRef(null);
   const refreshRef = useRef(null);
   const tableRef = useRef(null);
@@ -38,11 +36,11 @@ function BalanceSheet() {
       };
       const response = await axios.post(FetchGridData, obj);
       if (response.data.success) {
-        setData(response.data.data);
+        initalizegrid(response.data.data);
       }
       else
       {
-        setData([]);
+        initalizegrid([]);
       }
     } catch (error) {
       Swal.fire({
@@ -50,6 +48,26 @@ function BalanceSheet() {
         text: error || "Something went wrong!",
       });
     }
+  };
+
+  const initalizegrid = (data) => {
+    const table = new Tabulator(tableRef.current, {
+      layout: "fitColumns",
+      height: "400px",
+      data: data,
+      columns: [
+        { title: "S.No", field: "sno", formatter: "rownum", width: 70 },
+        { title: "Name", field: "Name", sorter: "date", minWidth: 120 },
+        {
+          title: "Balance",
+          field: "Balance",
+          sorter: "int",
+          width: 120,
+          hozAlign: "right",
+          formatter: "money",
+        },
+      ],
+    });
   };
 
   return (
@@ -83,24 +101,11 @@ function BalanceSheet() {
             </div>
           </div>
 
-          <div className="row g-4">
-        {data.map((row,index) => {
-            return (
-              <div key={index} className="col-12 col-md-6 col-lg-3">
-                  <div className="info-card">
-                      <div className="card-name">{row.Name}</div>
-                      <div className="amount-container">
-                          <span className="currency-symbol">₹</span>
-                          <span className="card-amount">{row.Balance}</span>
-                      </div>
-                  </div>
-              </div>
-            )
-        })}
-        
-
-       
-    </div>
+          <div className="row">
+            <div className="col-4">
+              <div ref={tableRef}></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
